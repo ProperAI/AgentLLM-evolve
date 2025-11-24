@@ -1,0 +1,44 @@
+services:
+  airflow-db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes: [ airflow_db:/var/lib/postgresql/data ]
+    ports:
+      - "5432:5432"
+
+  airflow-web:
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
+    image: my-airflow:latest
+    depends_on: [ airflow-db ]
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "True" #set to False normally, but jwk wants to be able to see for reference
+      AIRFLOW__CORE__FERNET_KEY: "n8bvFKreFzmNmqpK8MLTaAuOGpwHGQdHvwHrLSs-q6c="
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./scripts:/opt/airflow/scripts
+      - ./:/opt/airflow/repo
+    working_dir: /opt/airflow/repo
+    command: webserver
+    ports: [ "8080:8080" ] # 8080 exposed for UI
+
+  airflow-scheduler:
+    image: my
+    depends_on: [ airflow-db ]
+    environment:
+      AIRFLOW__CORE_EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./scripts:/opt/airflow/scripts
+      - ./:/opt/airflow/repo
+    working_dir: /opt/airflow/repo
+    command: scheduler
+volumes:
+  airflow_db:

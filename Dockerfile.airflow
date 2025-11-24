@@ -1,0 +1,34 @@
+# Dockerfile.airflow
+# Builds on the official Apache Airflow image and installs Python packages
+# from requirements.txt using the matching Airflow constraints file.
+ARG AIRFLOW_VERSION=2.10.3
+ARG PYTHON_VERSION=3.13.9
+FROM apache/airflow:${AIRFLOW_VERSION}-python${PYTHON_VERSION}-slim
+
+# run as root to install system deps & Python packages
+USER root
+
+# copy requirements
+COPY requirements.txt /requirements_airflow.txt # but i should make a specific requirements-airflow, which will be more minimal and include
+# only what is needed for Airflow operators i plan to use   #potentially some diaganottic/math packages
+
+
+# Install minimal build deps (for wheels that need compilation), install packages
+# using the Airflow constraints file for the specified Airflow/Python versions,
+# then clean up apt cache and temporary files.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    build-essential \
+    default-libmysqlclient-dev \
+    libpq-dev \
+    && pip install --no-cache-dir --upgrade pip setuptools wheel \
+    && if [ -s /tmp/requirements.txt ]; then \
+    pip install --no-cache-dir -r /tmp/requirements.txt \
+    --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"; \
+    fi \
+    && apt-get remove -y build-essential default-libmysqlclient-dev \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/* /tmp/requirements.txt
+
+# switch back to the airflow user provided by the base image
+USER airflow

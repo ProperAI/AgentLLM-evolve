@@ -1,0 +1,64 @@
+# --- OS / Editor ---
+.DS_Store
+*.swp
+*.swo
+.vscode/*
+!.vscode/launch.json        # keep debug config (optional)
+!.vscode/settings.json      # keep workspace settings (optional)
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+*.egg-info/
+.eggs/
+.build/
+dist/
+pip-wheel-metadata/
+
+# --- Virtualenvs (if any) ---
+.venv/
+venv/
+env/
+
+# --- Notebooks ---
+.ipynb_checkpoints/
+
+# --- Tests / tooling caches ---
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- Logs / runtime ---
+logs/
+*.log
+
+# --- Environment & secrets ---
+.env
+.env.*
+*.secret
+kaggle.json
+**/credentials.json
+**/service_account.json
+
+# --- Project data/artifacts ---
+# Raw notes & local data (track a README instead)
+data/**
+!data/.gitkeep
+!data/README.md
+
+# Vector DB / index artifacts
+artifacts/**
+!artifacts/.gitkeep
+# common FAISS outputs (explicitly ignored even if above line removed)
+**/faiss_index/**
+**/index.faiss
+**/index.pkl
+**/docstore.pkl
+
+# --- Generated models/checkpoints (if you add later) ---
+models/**
+checkpoints/**
